@@ -1,0 +1,30 @@
+# A simple test file for the oisc assembler
+
+loop:
+    0x101, 0x101
+	hello, Z         # Move character at pointer to 0x101
+	Z, 0x101
+	Z, Z
+
+    0x100, 0x100     # Word at 0x101 is ready
+
+	negOne, loop$3   # Add to the character pointer
+	negOne, check$1  # Add to the checked pointer
+
+check:
+	Z, hello, -1     # Terminate if at end of string
+	Z, Z, loop       # Else loop again
+
+
+
+# Variables:
+
+hello:
+. "Hello, World!"
+. 0
+
+negOne:
+. -1
+
+Z:
+. 0

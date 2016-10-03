@@ -1,0 +1,77 @@
+Debug file format:
+
+Beginning:
+    0xDE 0xBF
+
+Data:
+    64-bits:  program offset
+    16-bits:  number of source files
+
+Source Files:
+    16-bits: filename length
+    n-bytes: filename
+    16-bits: number of lines of code to be represented
+
+Line information:
+    32-bits: address
+    32-bits: line in source
+
+Example:
+=======================
+dbg:
+------------------------
+    0xDE 0xBF
+---
+    0x0000000000000000
+    0x0001
+---
+    0x0007
+    "test.sq"
+    0x0008
+---
+    0x00000000
+    0x00000003
+
+    0x00000003
+    0x00000004
+    
+    0x00000009
+    0x00000005
+
+    0x0000000C
+    0x00000006
+
+    0x0000000F
+    0x00000008
+    ...
+-----------------------
+
+test.sq:
+-----------------------
+# A simple test file for the oisc assembler
+loop:
+    0x101, 0x101
+	hello, Z         # Move character at pointer to 0x101
+	Z, 0x101
+	Z, Z
+
+    0x100, 0x100     # Word at 0x101 is ready
+
+	negOne, loop$3   # Add to the character pointer
+	negOne, check$1  # Add to the checked pointer
+
+check:
+	Z, hello, -1     # Terminate if at end of string
+	Z, Z, loop       # Else loop again
+
+# Variables:
+hello:
+. "Hello, World!"
+. 0
+
+negOne:
+. -1
+
+Z:
+. 0
+-----------------------

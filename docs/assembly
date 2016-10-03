@@ -1,0 +1,27 @@
+Subleq assembly code specifications.
+
+Opcode format:
+    A, B
+    or
+    A, B, C
+    If C is excluded, C is taken as the location of the next instruction
+
+labels:
+    label_name:
+    labels are referenced by name: label_name
+    labels can be used anywhere where numbers can be used
+    you can get a value n words after the lable by doing label_name$n
+
+data:
+    storing data is done by placing a . at the beginning of a line.
+    There are two types of data that can be stored:
+        String:
+            . "some string"
+        Number:
+            . -1234
+            . 0xDEADBEEF
+            . 0777
+
+comments:
+    comments are specified by placing a # before the text you want to comment:
+        #This a comment
