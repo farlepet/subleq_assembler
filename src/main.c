@@ -37,6 +37,7 @@ void usage(int);
 int64_t get_number(char *);
 void find_labels();
 void debug_write(int64_t, uint32_t);
+char *get_csv_val(char *str);
 
 int main(int argc, char **argv)
 {
@@ -106,15 +107,18 @@ int main(int argc, char **argv)
 
 		if(str[0] == '.') // Data
 		{
-            int i = 1;
-            while(str[i] == ' ') i++;
-			if(str[i] == '"') // There MUST be a space inbewteen
-			{
-				i++;
-				while(str[i] != '"')
-					write_word(out, str[i++], endian, bytes);//WR(str[i++]);
-			}
-			else write_word(out, get_number(str + i), endian, bytes);//WR(get_number(str + 2));
+            char *dat = get_csv_val(str + 1);
+            do {
+                int i = 1;
+                while(dat[i] == ' ') i++;
+			    if(dat[i] == '"') // There MUST be a space inbewteen
+			    {
+				    i++;
+				    while(dat[i] != '"')
+			    		write_word(out, dat[i++], endian, bytes);
+			    }
+			    else write_word(out, get_number(dat + i), endian, bytes);
+            } while((dat = get_csv_val(NULL)) != NULL);
 			continue;
 		}
 
@@ -139,13 +143,37 @@ int main(int argc, char **argv)
 		else   C = get_number(c);
 
 		write_op(out, A, B, C, endian, bytes);
-        //WRITE(A, B, C);
 	}
 
 	fclose(in);
 	fclose(out);
 
 	return 0;
+}
+
+char *get_csv_val(char *str) {
+    static char *curr_str;
+    if(str != NULL) curr_str = str;
+    if(curr_str == NULL) return NULL;
+    str = curr_str;
+    while(*str != '\0' && *str != ',') {
+        if(*str == '"') {
+            str++;
+            while(*str != '"') {
+                if(*str == '\0') {
+                    fprintf(stderr, "get_csv_val: Could not find ending quotation mark.");
+                    return NULL;
+                }
+                str++;
+            }
+        }
+        str++;
+    }
+    char *ret = curr_str;
+    if(*str == '\0') curr_str = NULL;
+    else curr_str = str + 1;
+    *str = '\0';
+    return ret;
 }
 
 
@@ -171,7 +199,7 @@ void find_labels()
 
 	char str[1024];
 
-	while(fgets(str, 1024, in)) //fscanf(in, "%[^\n]\n", str) != EOF)
+	while(fgets(str, 1024, in))
 	{
 		// Convert entire line to uppercase
 		unsigned i = 0;
@@ -186,12 +214,10 @@ void find_labels()
 
 		if(colon) // We found a label
 		{
-			//memcpy(labels[c_idx].name, str, colon);
             sprintf(labels[c_idx].name, "%.*s", colon, str);
 			labels[c_idx].hash = strhash(labels[c_idx].name);
 			labels[c_idx].line = line;
 			labels[c_idx].addr = addr;
-            //printf("  Found Label: %s at 0x%X\n", labels[c_idx].name, labels[c_idx].addr);
 			c_idx++;
 			continue;
 		}
@@ -203,14 +229,17 @@ void find_labels()
 
 		if(str[0] == '.') // Data
 		{
-            int ix = 1;
-            while(str[ix] == ' ') ix++;
-			if(str[ix] == '"')
-			{
-				int i = ix+1;
-				while(str[i++] != '"') addr++;
-			}
-			else addr++; // Only one integer may be supplied per line right now
+            char *dat = get_csv_val(str + 1);
+            do {
+                int i = 1;
+                while(dat[i] == ' ') i++;
+			    if(dat[i] == '"') // There MUST be a space inbewteen
+			    {
+				    i++;
+				    while(dat[i++] != '"') addr++;
+			    }
+			    else addr++;
+            } while((dat = get_csv_val(NULL)) != NULL);
 			continue;
 		}
         loc++;
@@ -230,7 +259,6 @@ int find_label(char *name)
 	{
 		if(labels[i].hash == hash)
 			if(!strcmp(labels[i].name, name)) { // Just incase two labels have the same hash
-                //printf("Using label: %s at 0x%X\n", labels[i].name, labels[i].addr);
 				return i;
             }
 	}
@@ -241,7 +269,7 @@ int find_label(char *name)
 int64_t get_number(char *str)
 {
 	while(isspace(*str)) str++;
-    if(!isdigit(*str) && (*str != '+' && *str != '-'))//isalpha(*str))
+    if(!isdigit(*str) && (*str != '+' && *str != '-'))
 	{
 		uint64_t i = 0;
 		int64_t off = 0; // Signed, because it can be a negative offset

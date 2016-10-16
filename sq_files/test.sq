@@ -20,11 +20,13 @@ check:
 # Variables:
 
 hello:
-. "Hello, World!"
-. 0
+. "Hello, World!", 0
 
 negOne:
 . -1
 
 Z:
 . 0
+
+test_arr:
+. 1, 2, 4, 8, 16, 32, 64, 128, 512, 1024, 2048
