@@ -39,6 +39,8 @@ void find_labels();
 void debug_write(int64_t, uint32_t);
 char *get_csv_val(char *str);
 
+uint32_t line = 0;
+
 int main(int argc, char **argv)
 {
 	handle_opts(argc, argv);
@@ -84,7 +86,6 @@ int main(int argc, char **argv)
 	fseek(in, 0, SEEK_SET);
 
 	char str[1024];
-    uint32_t line = 0;
 
 	while(fgets(str, 1024, in))
 	{
@@ -107,10 +108,18 @@ int main(int argc, char **argv)
 
 		if(str[0] == '.') // Data
 		{
+            if(strstr(str, ".RESV") == str) { // Reserve words
+                char *val = str + 5;
+                while(isspace(*val)) val++;
+                int n_words = get_number(val);
+                int i = 0;
+                for(; i < n_words; i++) write_word(out, 0, endian, bytes);
+                continue;
+            }
             char *dat = get_csv_val(str + 1);
             do {
                 int i = 1;
-                while(dat[i] == ' ') i++;
+                while(isspace(dat[i])) i++;
 			    if(dat[i] == '"') // There MUST be a space inbewteen
 			    {
 				    i++;
@@ -213,7 +222,7 @@ void find_labels()
 		}
 
 		if(colon) // We found a label
-		{
+        {
             sprintf(labels[c_idx].name, "%.*s", colon, str);
 			labels[c_idx].hash = strhash(labels[c_idx].name);
 			labels[c_idx].line = line;
@@ -229,6 +238,13 @@ void find_labels()
 
 		if(str[0] == '.') // Data
 		{
+            if(strstr(str, ".RESV") == str) { // Reserve words
+                char *val = str + 5;
+                while(isspace(*val)) val++;
+                addr += get_number(val);
+                continue;
+            }
+
             char *dat = get_csv_val(str + 1);
             do {
                 int i = 1;
@@ -289,7 +305,7 @@ int64_t get_number(char *str)
 		int idx = find_label(str);
 		if(idx == -1)
 		{
-			printf("ERROR: Could not find label: '%s'", str);
+			printf("ERROR: [line %d] Could not find label: '%s'", line, str);
 			exit(1);
 		}
 		return labels[idx].addr + off;
