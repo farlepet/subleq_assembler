@@ -16,11 +16,13 @@ data:
     storing data is done by placing a . at the beginning of a line.
     There are two types of data that can be stored:
         String:
-            . "some string"
+            . "some string", 0
         Number:
             . -1234
             . 0xDEADBEEF
-            . 0777
+            . 0777, 32, 0xFFFF
+    You can also reserve a block of memory to use for data storage:
+        .resv [number of words to reserve]
 
 comments:
     comments are specified by placing a # before the text you want to comment:
