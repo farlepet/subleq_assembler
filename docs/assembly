@@ -24,6 +24,14 @@ data:
     You can also reserve a block of memory to use for data storage:
         .resv [number of words to reserve]
 
+static definitions:
+    You can create a definition that will replace all instances of its name with a specified numeric value:
+        .defn def_name, value
+    For example:
+        .defn ser_out, 0x101
+        _Z, ser_out ==> _Z, 0x101
+
+
 comments:
     comments are specified by placing a # before the text you want to comment:
         #This a comment
