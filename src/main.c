@@ -218,7 +218,7 @@ void handle_opts(int argc, char **argv) {
 
 void usage(int retval) {
 	puts(
-    "USAGE: osic-asm [OPTIONS] -i infile -o outfile\n"
+    "USAGE: subleq_assembler [OPTIONS] -i infile -o outfile\n"
 	"  OPTIONS:\n"
 	"    -h: Show this help message.\n"
 	"    -i: Source file to assemble.\n"
