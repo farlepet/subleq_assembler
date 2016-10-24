@@ -24,6 +24,7 @@ void def_create(char *line) {
     }
     strcpy(definitions[n_defs].name, name);
     definitions[n_defs].value = get_number(value);
+    //printf("DEF[%d]: %s[%04lX]\n", n_defs, definitions[n_defs].name, definitions[n_defs].value);
     n_defs++;
 }
 

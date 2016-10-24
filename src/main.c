@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 		int not_white = 0, is_comment = 0, colon = 0;
 		for(; i < strlen(str); i++)
 		{
-			str[i] = toupper(str[i]);
+			//str[i] = toupper(str[i]);
 			if(str[i] == ':' && !is_comment) colon = 1;
 			if(!not_white && str[i] == '#') is_comment = 1;
 			if(!isspace(str[i])) not_white = 1;
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
 			!not_white || is_comment) continue; // This line is a comment, or whitespace
 
 		if(str[0] == '.') { // Data
-            if(strstr(str, ".RESV") == str) { // Reserve words
+            if(!strncasecmp(str, ".RESV", 5)) { // Reserve words
                 char *val = str + 5;
                 while(isspace(*val)) val++;
                 int n_words = get_number(val);
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
                 for(; i < n_words; i++) write_word(out, 0, endian, bytes);
                 continue;
             }
-            if(strstr(str, ".DEFN") == str) continue;
+            if(!strncasecmp(str, ".DEFN", 5)) continue;
             char *dat = get_csv_val(str + 1);
             do {
                 int i = 1;

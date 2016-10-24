@@ -9,7 +9,7 @@
 #include <definitions.h>
 
 struct label *labels;
-static int max_labels = 1024; // Maximum number of lables allowed
+static int max_labels = 1024; // Maximum number of labels allowed
 
 void find_labels() {
 	labels = malloc(sizeof(struct label) * max_labels);
@@ -25,17 +25,19 @@ void find_labels() {
 		unsigned i = 0;
 		int not_white = 0, is_comment = 0, colon = 0;
 		for(; i < strlen(str); i++) {
-			str[i] = toupper(str[i]);
+			//str[i] = toupper(str[i]);
 			if(str[i] == ':' && !is_comment) colon = i; // If it is the first char on the line, ignore it
 			if(!not_white && str[i] == '#') is_comment = 1;
 			if(!isspace(str[i])) not_white = 1;
 		}
 
 		if(colon) { // We found a label
-            sprintf(labels[c_idx].name, "%.*s", colon, str);
+            //sprintf(labels[c_idx].name, "%.*s", colon, str);
+            memcpy(labels[c_idx].name, str, colon);
 			labels[c_idx].hash = strhash(labels[c_idx].name);
 			labels[c_idx].line = line;
 			labels[c_idx].addr = addr;
+            //printf("LBL: %s [%3d:%4lX]\n", labels[c_idx].name, line, addr);
 			c_idx++;
 			continue;
 		}
@@ -46,13 +48,13 @@ void find_labels() {
 			!not_white || is_comment) continue; // This line is a comment, or whitespace
 
 		if(str[0] == '.') { // Data
-            if(strstr(str, ".RESV") == str) { // Reserve words
+            if(!strncasecmp(str, ".RESV", 5)) { // Reserve words
                 char *val = str + 5;
                 while(isspace(*val)) val++;
                 addr += get_number(val);
                 continue;
             }
-            if(strstr(str, ".DEFN") == str) { // Define value
+            if(!strncasecmp(str, ".DEFN", 5)) { // Define value
                 char *val = str + 5;
                 while(isspace(*val)) val++;
                 def_create(val);
